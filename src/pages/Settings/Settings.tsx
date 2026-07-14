@@ -1,5 +1,11 @@
-function Dashboard() {
-  return <h1>Dashboard</h1>;
-}
+export default function Settings() {
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
 
-export default Dashboard;
+      <p className="mt-2 text-gray-600">
+        Manage your account and application preferences.
+      </p>
+    </div>
+  );
+}

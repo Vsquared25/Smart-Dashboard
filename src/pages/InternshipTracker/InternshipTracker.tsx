@@ -1,5 +1,13 @@
-function Dashboard() {
-  return <h1>Dashboard</h1>;
-}
+export default function InternshipTracker() {
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">
+        Internship Tracker
+      </h1>
 
-export default Dashboard;
+      <p className="mt-2 text-gray-600">
+        Track internship applications, interviews, and deadlines.
+      </p>
+    </div>
+  );
+}
