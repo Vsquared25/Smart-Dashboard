@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
   {
@@ -37,17 +37,23 @@ export default function Sidebar() {
       <h1 className="mb-8 text-2xl font-bold text-blue-600">
   CareerOS
   </h1>
-      <nav className="flex flex-col gap-2">
-        {navItems.map((item) => (<Link
-          
-            key={item.route}
-            to={item.route}
-            className="rounded-md px-3 py-2 text-gray-700 transition-colors hover:bg-blue-600 hover:text-white"
-          >
-            {item.name}
-          </Link>
-        ))}
-      </nav>
+  <nav className="flex flex-col gap-2">
+      {navItems.map((item) => (
+  <NavLink
+    key={item.route}
+    to={item.route}
+    className={({ isActive }) =>
+      `rounded-md px-3 py-2 transition-colors ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-gray-700 hover:bg-gray-100"
+      }`
+    }
+  >
+    {item.name}
+  </NavLink>
+))}
+</nav>
     </aside>
   );
 }
