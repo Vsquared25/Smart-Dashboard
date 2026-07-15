@@ -1,11 +1,24 @@
+import { useLocation } from "react-router-dom";
 import { Bell, CircleUser, Search } from "lucide-react";
 
+const pageTitles: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/courses": "Courses",
+  "/assignments": "Assignments",
+  "/calendar": "Calendar",
+  "/study-planner": "Study Planner",
+  "/internship-tracker": "Internship Tracker",
+  "/settings": "Settings",
+};
+
 export default function Navbar() {
+  const location = useLocation();
+  const pageTitle = pageTitles[location.pathname] ?? "CareerOS";
   return (
     <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
       {/* Left: current page title */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Dashboard</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{pageTitle}</h2>
       </div>
 
       {/* Center: search field */}
