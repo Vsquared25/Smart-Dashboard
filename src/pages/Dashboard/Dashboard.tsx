@@ -5,6 +5,9 @@ import {
   Clock3,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { getHealth } from "../../services/api";
+
 const summaryCards = [
   {
     title: "Upcoming Assignments",
@@ -37,6 +40,24 @@ const summaryCards = [
 ];
 
 export default function Dashboard() {
+  const [apiMessage, setApiMessage] = useState("Checking API connection...");
+const [apiConnected, setApiConnected] = useState(false);
+
+useEffect(() => {
+  async function checkApiConnection() {
+    try {
+      const response = await getHealth();
+
+      setApiMessage(response.message);
+      setApiConnected(true);
+    } catch {
+      setApiMessage("CareerOS API is unavailable.");
+      setApiConnected(false);
+    }
+  }
+
+  void checkApiConnection();
+}, []);
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900">
@@ -47,6 +68,15 @@ export default function Dashboard() {
         Here is an overview of your academic and career progress.
       </p>
 
+      <div
+  className={`mt-6 rounded-lg border px-4 py-3 text-sm font-medium ${
+    apiConnected
+      ? "border-green-200 bg-green-50 text-green-700"
+      : "border-yellow-200 bg-yellow-50 text-yellow-700"
+  }`}
+>
+  {apiMessage}
+</div>
       <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => {
           const Icon = card.icon;
