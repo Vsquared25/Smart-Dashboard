@@ -11,6 +11,15 @@ export type Course = {
   credits: number;
 };
 
+export type Assignment = {
+  id: number;
+  title: string;
+  course: string;
+  dueDate: string;
+  priority: "Low" | "Medium" | "High";
+  completed: boolean;
+};
+
 const apiBaseUrl =
   import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -61,5 +70,75 @@ export async function deleteCourse(id: number): Promise<void> {
 
   if (!response.ok) {
     throw new Error("Could not delete course.");
+  }
+}
+
+export async function getAssignments(): Promise<Assignment[]> {
+  const response = await fetch(`${apiBaseUrl}/api/assignments`);
+
+  if (!response.ok) {
+    throw new Error("Could not load assignments.");
+  }
+
+  return response.json();
+}
+
+export type NewAssignment = Omit<
+  Assignment,
+  "id" | "completed"
+>;
+
+export async function createAssignment(
+  assignment: NewAssignment,
+): Promise<Assignment> {
+  const response = await fetch(`${apiBaseUrl}/api/assignments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(assignment),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not create assignment.");
+  }
+
+  return response.json();
+}
+
+export async function updateAssignmentCompletion(
+  id: number,
+  completed: boolean,
+): Promise<Assignment> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/assignments/${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ completed }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not update assignment.");
+  }
+
+  return response.json();
+}
+
+export async function deleteAssignment(
+  id: number,
+): Promise<void> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/assignments/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not delete assignment.");
   }
 }

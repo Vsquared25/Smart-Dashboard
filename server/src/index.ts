@@ -33,6 +33,110 @@ app.get("/api/courses", async (_request, response) => {
   response.status(200).json(courses);
 });
 
+app.get("/api/assignments", async (_request, response) => {
+  const assignments = await prisma.assignment.findMany({
+    orderBy: {
+      dueDate: "asc",
+    },
+  });
+
+  response.status(200).json(assignments);
+});
+
+app.post("/api/assignments", async (request, response) => {
+  const { title, course, dueDate, priority } = request.body;
+
+  const validPriorities = ["Low", "Medium", "High"];
+
+  if (
+    typeof title !== "string" ||
+    typeof course !== "string" ||
+    typeof dueDate !== "string" ||
+    typeof priority !== "string" ||
+    !title.trim() ||
+    !course.trim() ||
+    !validPriorities.includes(priority)
+  ) {
+    return response.status(400).json({
+      message: "Valid assignment details are required.",
+    });
+  }
+
+  const parsedDueDate = new Date(dueDate);
+
+  if (Number.isNaN(parsedDueDate.getTime())) {
+    return response.status(400).json({
+      message: "Due date must be valid.",
+    });
+  }
+
+  const newAssignment = await prisma.assignment.create({
+    data: {
+      title: title.trim(),
+      course: course.trim(),
+      dueDate: parsedDueDate,
+      priority,
+      completed: false,
+    },
+  });
+
+  return response.status(201).json(newAssignment);
+});
+
+app.patch("/api/assignments/:id", async (request, response) => {
+  const id = Number(request.params.id);
+  const { completed } = request.body;
+
+  if (!Number.isInteger(id) || typeof completed !== "boolean") {
+    return response.status(400).json({
+      message: "A valid assignment ID and completed value are required.",
+    });
+  }
+
+  const existingAssignment = await prisma.assignment.findUnique({
+    where: { id },
+  });
+
+  if (!existingAssignment) {
+    return response.status(404).json({
+      message: "Assignment not found.",
+    });
+  }
+
+  const updatedAssignment = await prisma.assignment.update({
+    where: { id },
+    data: { completed },
+  });
+
+  return response.status(200).json(updatedAssignment);
+});
+
+app.delete("/api/assignments/:id", async (request, response) => {
+  const id = Number(request.params.id);
+
+  if (!Number.isInteger(id)) {
+    return response.status(400).json({
+      message: "Assignment ID must be a whole number.",
+    });
+  }
+
+  const existingAssignment = await prisma.assignment.findUnique({
+    where: { id },
+  });
+
+  if (!existingAssignment) {
+    return response.status(404).json({
+      message: "Assignment not found.",
+    });
+  }
+
+  await prisma.assignment.delete({
+    where: { id },
+  });
+
+  return response.status(204).send();
+});
+
 app.post("/api/courses", async (request, response) => {
   const { code, name, instructor, credits } = request.body;
 

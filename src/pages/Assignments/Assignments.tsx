@@ -1,47 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-
-type Assignment = {
-  id: number;
-  title: string;
-  course: string;
-  dueDate: string;
-  priority: "Low" | "Medium" | "High";
-  completed: boolean;
-};
+import {
+  createAssignment,
+  deleteAssignment as deleteAssignmentFromApi,
+  getAssignments,
+  updateAssignmentCompletion,
+  type Assignment,
+} from "../../services/api";
 
 type AssignmentFilter = "all" | "active" | "completed";
 
-const initialAssignments: Assignment[] = [
-  {
-    id: 1,
-    title: "Software Project Component",
-    course: "CSE 2231",
-    dueDate: "2026-07-18",
-    priority: "High",
-    completed: false,
-  },
-  {
-    id: 2,
-    title: "Foundations Homework",
-    course: "CSE 2321",
-    dueDate: "2026-07-20",
-    priority: "Medium",
-    completed: false,
-  },
-  {
-    id: 3,
-    title: "Review Lecture Notes",
-    course: "CSE 2231",
-    dueDate: "2026-07-22",
-    priority: "Low",
-    completed: true,
-  },
-];
+
 
 export default function Assignments() {
   const [assignments, setAssignments] =
-    useState<Assignment[]>(initialAssignments);
+    useState<Assignment[]>([]);
+
+    useEffect(() => {
+  async function loadAssignments() {
+    try {
+      const assignmentsFromApi = await getAssignments();
+      setAssignments(assignmentsFromApi);
+    } catch {
+      console.error("Could not load assignments from the API.");
+    }
+  }
+
+  loadAssignments();
+}, []);
 
   const [filter, setFilter] =
     useState<AssignmentFilter>("all");
@@ -52,7 +38,7 @@ export default function Assignments() {
   const [priority, setPriority] =
     useState<Assignment["priority"]>("Medium");
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
   event.preventDefault();
 
   if (
@@ -63,47 +49,70 @@ export default function Assignments() {
     return;
   }
 
-  const newAssignment: Assignment = {
-    id: Date.now(),
-    title: assignmentTitle.trim(),
-    course: assignmentCourse.trim(),
-    dueDate,
-    priority,
-    completed: false,
-  };
+  try {
+    const newAssignment = await createAssignment({
+      title: assignmentTitle.trim(),
+      course: assignmentCourse.trim(),
+      dueDate,
+      priority,
+    });
 
-  setAssignments((currentAssignments) => [
-    ...currentAssignments,
-    newAssignment,
-  ]);
+    setAssignments((currentAssignments) => [
+      ...currentAssignments,
+      newAssignment,
+    ]);
 
-  setAssignmentTitle("");
-  setAssignmentCourse("");
-  setDueDate("");
-  setPriority("Medium");
-  setFilter("all");
+    setAssignmentTitle("");
+    setAssignmentCourse("");
+    setDueDate("");
+    setPriority("Medium");
+    setFilter("all");
+  } catch {
+    console.error("Could not create assignment.");
+  }
 }
 
-  function toggleAssignment(id: number) {
-    setAssignments((currentAssignments) =>
-      currentAssignments.map((assignment) =>
-        assignment.id === id
-          ? {
-              ...assignment,
-              completed: !assignment.completed,
-            }
-          : assignment,
-      ),
-    );
+  async function toggleAssignment(id: number) {
+  const assignment = assignments.find(
+    (currentAssignment) => currentAssignment.id === id,
+  );
+
+  if (!assignment) {
+    return;
   }
 
-  function deleteAssignment(id: number) {
+  try {
+    const updatedAssignment =
+      await updateAssignmentCompletion(
+        id,
+        !assignment.completed,
+      );
+
+    setAssignments((currentAssignments) =>
+      currentAssignments.map((currentAssignment) =>
+        currentAssignment.id === id
+          ? updatedAssignment
+          : currentAssignment,
+      ),
+    );
+  } catch {
+    console.error("Could not update assignment.");
+  }
+}
+
+  async function deleteAssignment(id: number) {
+  try {
+    await deleteAssignmentFromApi(id);
+
     setAssignments((currentAssignments) =>
       currentAssignments.filter(
         (assignment) => assignment.id !== id,
       ),
     );
+  } catch {
+    console.error("Could not delete assignment.");
   }
+}
 
   const filteredAssignments = assignments.filter((assignment) => {
     if (filter === "active") {

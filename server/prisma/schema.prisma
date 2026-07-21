@@ -15,3 +15,13 @@ model Course {
   credits    Int
   createdAt  DateTime @default(now())
 }
+
+model Assignment {
+  id        Int      @id @default(autoincrement())
+  title     String
+  course    String
+  dueDate   DateTime
+  priority  String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
