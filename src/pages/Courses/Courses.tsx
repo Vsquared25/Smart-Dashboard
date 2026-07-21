@@ -1,70 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import {
+  createCourse,
+  deleteCourse,
+  getCourses,
+  type Course,
+} from "../../services/api";
 
 
-type Course = {
-  id: number;
-  code: string;
-  name: string;
-  instructor: string;
-  credits: number;
-};
-
-const initialCourses: Course[] = [
-  {
-    id: 1,
-    code: "CSE 2231",
-    name: "Software II",
-    instructor: "Professor Smith",
-    credits: 4,
-  },
-  {
-    id: 2,
-    code: "CSE 2321",
-    name: "Foundations I",
-    instructor: "Professor Johnson",
-    credits: 3,
-  },
-];
 
 export default function Courses() {
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+  async function loadCourses() {
+    try {
+      const coursesFromApi = await getCourses();
+      setCourses(coursesFromApi);
+    } catch {
+      console.error("Could not load courses from the API.");
+    }
+  }
+
+  loadCourses();
+}, []);
 
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [instructor, setInstructor] = useState("");
   const [credits, setCredits] = useState("");
 
-  function removeCourse(id: number) {
-  setCourses((currentCourses) =>
-    currentCourses.filter((course) => course.id !== id),
-  );
+  async function removeCourse(id: number) {
+  try {
+    await deleteCourse(id);
+
+    setCourses((currentCourses) =>
+      currentCourses.filter((course) => course.id !== id),
+    );
+  } catch {
+    console.error("Could not delete the course.");
+  }
 }
-function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    // Prevents the browser from refreshing after submitting the form.
-    event.preventDefault();
+async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    const numericCredits = Number(credits);
+  const numericCredits = Number(credits);
 
-    // Do not submit if a field is empty or credits are invalid.
-    if (
-      !courseCode.trim() ||
-      !courseName.trim() ||
-      !instructor.trim() ||
-      numericCredits <= 0
-    ) {
-      return;
-    }
+  if (
+    !courseCode.trim() ||
+    !courseName.trim() ||
+    !instructor.trim() ||
+    numericCredits <= 0
+  ) {
+    return;
+  }
 
-    const newCourse: Course = {
-      id: Date.now(),
+  try {
+    const newCourse = await createCourse({
       code: courseCode.trim(),
       name: courseName.trim(),
       instructor: instructor.trim(),
       credits: numericCredits,
-    };
+    });
 
-    // Creates a new array containing the old courses and the new course.
     setCourses((currentCourses) => [
       ...currentCourses,
       newCourse,
@@ -74,7 +72,10 @@ function handleSubmit(event: FormEvent<HTMLFormElement>) {
     setCourseName("");
     setInstructor("");
     setCredits("");
+  } catch {
+    console.error("Could not create the course.");
   }
+}
 
   return (
     <div>
