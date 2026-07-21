@@ -1,31 +1,9 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
+import { prisma } from "./lib/prisma.js";
 
-type Course = {
-  id: number;
-  code: string;
-  name: string;
-  instructor: string;
-  credits: number;
-};
 
-const courses: Course[] = [
-  {
-    id: 1,
-    code: "CSE 2231",
-    name: "Software II",
-    instructor: "Professor Smith",
-    credits: 4,
-  },
-  {
-    id: 2,
-    code: "CSE 2321",
-    name: "Foundations I",
-    instructor: "Professor Johnson",
-    credits: 3,
-  },
-];
 
 const app = express();
 const port = process.env.PORT ?? 4000;
@@ -45,11 +23,17 @@ app.get("/api/health", (_request, response) => {
   });
 });
 
-app.get("/api/courses", (_request, response) => {
+app.get("/api/courses", async (_request, response) => {
+  const courses = await prisma.course.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
   response.status(200).json(courses);
 });
 
-app.post("/api/courses", (request, response) => {
+app.post("/api/courses", async (request, response) => {
   const { code, name, instructor, credits } = request.body;
 
   if (
@@ -67,20 +51,19 @@ app.post("/api/courses", (request, response) => {
     });
   }
 
-  const newCourse: Course = {
-    id: Date.now(),
-    code: code.trim(),
-    name: name.trim(),
-    instructor: instructor.trim(),
-    credits,
-  };
-
-  courses.push(newCourse);
+  const newCourse = await prisma.course.create({
+    data: {
+      code: code.trim(),
+      name: name.trim(),
+      instructor: instructor.trim(),
+      credits,
+    },
+  });
 
   return response.status(201).json(newCourse);
 });
 
-app.delete("/api/courses/:id", (request, response) => {
+app.delete("/api/courses/:id", async (request, response) => {
   const id = Number(request.params.id);
 
   if (!Number.isInteger(id)) {
@@ -89,17 +72,19 @@ app.delete("/api/courses/:id", (request, response) => {
     });
   }
 
-  const courseIndex = courses.findIndex(
-    (course) => course.id === id,
-  );
+  const existingCourse = await prisma.course.findUnique({
+    where: { id },
+  });
 
-  if (courseIndex === -1) {
+  if (!existingCourse) {
     return response.status(404).json({
       message: "Course not found.",
     });
   }
 
-  courses.splice(courseIndex, 1);
+  await prisma.course.delete({
+    where: { id },
+  });
 
   return response.status(204).send();
 });

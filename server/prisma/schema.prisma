@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Course {
+  id         Int      @id @default(autoincrement())
+  code       String
+  name       String
+  instructor String
+  credits    Int
+  createdAt  DateTime @default(now())
+}
