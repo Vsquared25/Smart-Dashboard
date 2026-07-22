@@ -7,9 +7,11 @@ import {
 
 import { useEffect, useState } from "react";
 import {
+  getApplications,
   getAssignments,
   getCourses,
   getHealth,
+  getSavedStudyPlans,
 } from "../../services/api";
 
 
@@ -19,20 +21,38 @@ export default function Dashboard() {
 const [apiConnected, setApiConnected] = useState(false);
 const [courseCount, setCourseCount] = useState(0);
 const [upcomingAssignmentCount, setUpcomingAssignmentCount] = useState(0);
+const [applicationCount, setApplicationCount] = useState(0);
+const [plannedStudyHours, setPlannedStudyHours] = useState(0);
 
 useEffect(() => {
   async function loadDashboardData() {
     try {
-      const [healthResponse, courses, assignments] = await Promise.all([
-        getHealth(),
-        getCourses(),
-        getAssignments(),
-      ]);
+      const [
+  healthResponse,
+  courses,
+  assignments,
+  applications,
+  studyPlans,
+] = await Promise.all([
+  getHealth(),
+  getCourses(),
+  getAssignments(),
+  getApplications(),
+  getSavedStudyPlans(),
+]);
 
       setApiMessage(healthResponse.message);
       setApiConnected(true);
 
       setCourseCount(courses.length);
+      setApplicationCount(applications.length);
+
+      const totalPlannedStudyHours = studyPlans.reduce(
+  (total, studyPlan) => total + studyPlan.availableHours,
+  0,
+);
+
+setPlannedStudyHours(totalPlannedStudyHours);
 
       const activeAssignments = assignments.filter(
         (assignment) => !assignment.completed,
@@ -64,15 +84,15 @@ const summaryCards = [
   iconColor: "bg-blue-100 text-blue-600",
   },
   {
-    title: "Study Hours",
-    value: "8.5",
-    description: "This week",
+    title: "Planned Study Hours",
+    value: plannedStudyHours,
+    description: "Across saved plans",
     icon: Clock3,
     iconColor: "bg-purple-100 text-purple-600",
   },
   {
     title: "Applications",
-    value: "12",
+    value: applicationCount,
     description: "Internships tracked",
     icon: BriefcaseBusiness,
     iconColor: "bg-emerald-100 text-emerald-600",
