@@ -6,22 +6,62 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { getHealth } from "../../services/api";
+import {
+  getAssignments,
+  getCourses,
+  getHealth,
+} from "../../services/api";
+
+
+
+export default function Dashboard() {
+  const [apiMessage, setApiMessage] = useState("Checking API connection...");
+const [apiConnected, setApiConnected] = useState(false);
+const [courseCount, setCourseCount] = useState(0);
+const [upcomingAssignmentCount, setUpcomingAssignmentCount] = useState(0);
+
+useEffect(() => {
+  async function loadDashboardData() {
+    try {
+      const [healthResponse, courses, assignments] = await Promise.all([
+        getHealth(),
+        getCourses(),
+        getAssignments(),
+      ]);
+
+      setApiMessage(healthResponse.message);
+      setApiConnected(true);
+
+      setCourseCount(courses.length);
+
+      const activeAssignments = assignments.filter(
+        (assignment) => !assignment.completed,
+      );
+
+      setUpcomingAssignmentCount(activeAssignments.length);
+    } catch {
+      setApiMessage("CareerOS API is unavailable.");
+      setApiConnected(false);
+    }
+  }
+
+  void loadDashboardData();
+}, []);
 
 const summaryCards = [
   {
-    title: "Upcoming Assignments",
-    value: "4",
-    description: "Due this week",
-    icon: ClipboardList,
-    iconColor: "bg-red-100 text-red-600",
+    title: "Active Assignments",
+  value: upcomingAssignmentCount,
+  description: "Not completed yet",
+  icon: ClipboardList,
+  iconColor: "bg-red-100 text-red-600",
   },
   {
     title: "Active Courses",
-    value: "5",
-    description: "Current semester",
-    icon: BookOpen,
-    iconColor: "bg-blue-100 text-blue-600",
+  value: courseCount,
+  description: "Current semester",
+  icon: BookOpen,
+  iconColor: "bg-blue-100 text-blue-600",
   },
   {
     title: "Study Hours",
@@ -38,26 +78,6 @@ const summaryCards = [
     iconColor: "bg-emerald-100 text-emerald-600",
   },
 ];
-
-export default function Dashboard() {
-  const [apiMessage, setApiMessage] = useState("Checking API connection...");
-const [apiConnected, setApiConnected] = useState(false);
-
-useEffect(() => {
-  async function checkApiConnection() {
-    try {
-      const response = await getHealth();
-
-      setApiMessage(response.message);
-      setApiConnected(true);
-    } catch {
-      setApiMessage("CareerOS API is unavailable.");
-      setApiConnected(false);
-    }
-  }
-
-  void checkApiConnection();
-}, []);
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900">
