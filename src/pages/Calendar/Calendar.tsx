@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getAssignments,
+  type Assignment,
+} from "../../services/api";
 
 const weekdays = [
   "Sun",
@@ -10,36 +14,25 @@ const weekdays = [
   "Sat",
 ];
 
-type CalendarEvent = {
-  id: number;
-  title: string;
-  date: string;
-  type: "assignment" | "study";
-};
 
-const calendarEvents: CalendarEvent[] = [
-  {
-    id: 1,
-    title: "Software Project",
-    date: "2026-07-18",
-    type: "assignment",
-  },
-  {
-    id: 2,
-    title: "Foundations Homework",
-    date: "2026-07-20",
-    type: "assignment",
-  },
-  {
-    id: 3,
-    title: "Study Session",
-    date: "2026-07-22",
-    type: "study",
-  },
-];
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+
+  useEffect(() => {
+  async function loadAssignments() {
+    try {
+      const savedAssignments = await getAssignments();
+      setAssignments(savedAssignments);
+    } catch {
+      console.error("Could not load assignments for the calendar.");
+    }
+  }
+
+  void loadAssignments();
+}, []);
 
   const monthTitle = currentDate.toLocaleString("en-US", {
     month: "long",
@@ -64,6 +57,13 @@ const calendarDays = [
   ...leadingEmptyDays,
   ...monthDays,
 ];
+
+const calendarEvents = assignments.map((assignment) => ({
+  id: assignment.id,
+  title: assignment.title,
+  date: assignment.dueDate.slice(0, 10),
+  type: "assignment" as const,
+}));
 
 function getEventsForDay(day: number) {
   const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(
