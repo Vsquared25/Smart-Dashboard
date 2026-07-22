@@ -198,6 +198,89 @@ app.delete("/api/courses/:id", async (request, response) => {
   return response.status(204).send();
 });
 
+app.get("/api/applications", async (_request, response) => {
+  const applications = await prisma.jobApplication.findMany({
+    orderBy: {
+      appliedDate: "desc",
+    },
+  });
+
+  return response.status(200).json(applications);
+});
+
+app.post("/api/applications", async (request, response) => {
+  const { company, role, location, appliedDate, status } = request.body;
+
+  const validStatuses = [
+    "Applied",
+    "Interviewing",
+    "Offer",
+    "Rejected",
+  ];
+
+  if (
+    typeof company !== "string" ||
+    typeof role !== "string" ||
+    typeof location !== "string" ||
+    typeof appliedDate !== "string" ||
+    typeof status !== "string" ||
+    !company.trim() ||
+    !role.trim() ||
+    !location.trim() ||
+    !validStatuses.includes(status)
+  ) {
+    return response.status(400).json({
+      message: "Valid application details are required.",
+    });
+  }
+
+  const parsedAppliedDate = new Date(appliedDate);
+
+  if (Number.isNaN(parsedAppliedDate.getTime())) {
+    return response.status(400).json({
+      message: "Application date must be valid.",
+    });
+  }
+
+  const newApplication = await prisma.jobApplication.create({
+    data: {
+      company: company.trim(),
+      role: role.trim(),
+      location: location.trim(),
+      appliedDate: parsedAppliedDate,
+      status,
+    },
+  });
+
+  return response.status(201).json(newApplication);
+});
+
+app.delete("/api/applications/:id", async (request, response) => {
+  const id = Number(request.params.id);
+
+  if (!Number.isInteger(id)) {
+    return response.status(400).json({
+      message: "Application ID must be a whole number.",
+    });
+  }
+
+  const existingApplication = await prisma.jobApplication.findUnique({
+    where: { id },
+  });
+
+  if (!existingApplication) {
+    return response.status(404).json({
+      message: "Application not found.",
+    });
+  }
+
+  await prisma.jobApplication.delete({
+    where: { id },
+  });
+
+  return response.status(204).send();
+});
+
 app.get("/api/study-plans", async (_request, response) => {
   const studyPlans = await prisma.studyPlan.findMany({
     orderBy: {

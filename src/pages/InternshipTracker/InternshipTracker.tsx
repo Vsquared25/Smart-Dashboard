@@ -1,49 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-
-type ApplicationStatus =
-  | "Applied"
-  | "Interviewing"
-  | "Offer"
-  | "Rejected";
+import {
+  createApplication,
+  deleteApplication as deleteApplicationFromApi,
+  getApplications,
+  type ApplicationStatus,
+  type JobApplication,
+} from "../../services/api";
 
 type ApplicationFilter = "All" | ApplicationStatus;
-
-type JobApplication = {
-  id: number;
-  company: string;
-  role: string;
-  location: string;
-  appliedDate: string;
-  status: ApplicationStatus;
-};
-
-const initialApplications: JobApplication[] = [
-  {
-    id: 1,
-    company: "Nationwide",
-    role: "Software Engineering Intern",
-    location: "Columbus, OH",
-    appliedDate: "2026-07-15",
-    status: "Applied",
-  },
-  {
-    id: 2,
-    company: "JPMorgan Chase",
-    role: "Software Engineer Intern",
-    location: "Columbus, OH",
-    appliedDate: "2026-07-17",
-    status: "Interviewing",
-  },
-  {
-    id: 3,
-    company: "GE Aerospace",
-    role: "Digital Technology Intern",
-    location: "Evendale, OH",
-    appliedDate: "2026-07-19",
-    status: "Applied",
-  },
-];
 
 const filterOptions: ApplicationFilter[] = [
   "All",
@@ -61,19 +26,38 @@ const [appliedDate, setAppliedDate] = useState("");
 const [status, setStatus] =
   useState<ApplicationStatus>("Applied");
   const [applications, setApplications] =
-    useState<JobApplication[]>(initialApplications);
+    useState<JobApplication[]>([]);
     const [filter, setFilter] =
   useState<ApplicationFilter>("All");
 
-  function deleteApplication(id: number) {
+  useEffect(() => {
+  async function loadApplications() {
+    try {
+      const savedApplications = await getApplications();
+      setApplications(savedApplications);
+    } catch {
+      console.error("Could not load internship applications.");
+    }
+  }
+
+  void loadApplications();
+}, []);
+
+  async function deleteApplication(id: number) {
+  try {
+    await deleteApplicationFromApi(id);
+
     setApplications((currentApplications) =>
       currentApplications.filter(
         (application) => application.id !== id,
       ),
     );
+  } catch {
+    console.error("Could not delete internship application.");
   }
+}
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
   event.preventDefault();
 
   if (
@@ -85,25 +69,28 @@ const [status, setStatus] =
     return;
   }
 
-  const newApplication: JobApplication = {
-    id: Date.now(),
-    company: company.trim(),
-    role: role.trim(),
-    location: location.trim(),
-    appliedDate,
-    status,
-  };
+  try {
+    const savedApplication = await createApplication({
+      company: company.trim(),
+      role: role.trim(),
+      location: location.trim(),
+      appliedDate,
+      status,
+    });
 
-  setApplications((currentApplications) => [
-    ...currentApplications,
-    newApplication,
-  ]);
+    setApplications((currentApplications) => [
+      savedApplication,
+      ...currentApplications,
+    ]);
 
-  setCompany("");
-  setRole("");
-  setLocation("");
-  setAppliedDate("");
-  setStatus("Applied");
+    setCompany("");
+    setRole("");
+    setLocation("");
+    setAppliedDate("");
+    setStatus("Applied");
+  } catch {
+    console.error("Could not create internship application.");
+  }
 }
 const filteredApplications = applications.filter(
   (application) =>

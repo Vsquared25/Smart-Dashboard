@@ -37,3 +37,13 @@ model StudyPlan {
   source         String
   createdAt      DateTime @default(now())
 }
+
+model JobApplication {
+  id          Int      @id @default(autoincrement())
+  company     String
+  role        String
+  location    String
+  appliedDate DateTime
+  status      String
+  createdAt   DateTime @default(now())
+}

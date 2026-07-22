@@ -232,3 +232,61 @@ export async function deleteSavedStudyPlan(
     throw new Error("Could not delete saved study plan.");
   }
 }
+
+export type ApplicationStatus =
+  | "Applied"
+  | "Interviewing"
+  | "Offer"
+  | "Rejected";
+
+export type JobApplication = {
+  id: number;
+  company: string;
+  role: string;
+  location: string;
+  appliedDate: string;
+  status: ApplicationStatus;
+};
+
+export type NewJobApplication = Omit<JobApplication, "id">;
+
+export async function getApplications(): Promise<JobApplication[]> {
+  const response = await fetch(`${apiBaseUrl}/api/applications`);
+
+  if (!response.ok) {
+    throw new Error("Could not load applications.");
+  }
+
+  return response.json();
+}
+
+export async function createApplication(
+  application: NewJobApplication,
+): Promise<JobApplication> {
+  const response = await fetch(`${apiBaseUrl}/api/applications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(application),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not create application.");
+  }
+
+  return response.json();
+}
+
+export async function deleteApplication(id: number): Promise<void> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/applications/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not delete application.");
+  }
+}
