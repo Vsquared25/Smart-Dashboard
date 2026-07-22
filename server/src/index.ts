@@ -2,6 +2,11 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { prisma } from "./lib/prisma.js";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 
 
@@ -193,7 +198,67 @@ app.delete("/api/courses/:id", async (request, response) => {
   return response.status(204).send();
 });
 
+app.post("/api/study-plans", async (request, response) => {
+  const {
+    course,
+    goal,
+    deadline,
+    availableHours,
+    difficulty,
+  } = request.body;
 
+  const validDifficulties = ["Easy", "Medium", "Hard"];
+
+  if (
+    typeof course !== "string" ||
+    typeof goal !== "string" ||
+    typeof deadline !== "string" ||
+    typeof availableHours !== "number" ||
+    typeof difficulty !== "string" ||
+    !course.trim() ||
+    !goal.trim() ||
+    availableHours <= 0 ||
+    !validDifficulties.includes(difficulty)
+  ) {
+    return response.status(400).json({
+      message: "Valid study-plan details are required.",
+    });
+  }
+
+  try {
+    const aiResponse = await openai.responses.create({
+      model: "gpt-5.6-luna",
+      input: `Create a practical study plan for a college student.
+
+Course: ${course.trim()}
+Goal: ${goal.trim()}
+Deadline: ${deadline}
+Available study hours: ${availableHours}
+Difficulty: ${difficulty}
+
+Return 4 to 6 concise study sessions.
+Put each session on its own line.
+Include a specific focus area and estimated time for each session.
+Do not use markdown headings or introductory text.`,
+    });
+
+    const plan = aiResponse.output_text.trim();
+
+    if (!plan) {
+      return response.status(502).json({
+        message: "The AI did not return a study plan.",
+      });
+    }
+
+    return response.status(200).json({ plan });
+  } catch (error) {
+    console.error("Could not generate study plan:", error);
+
+    return response.status(502).json({
+      message: "Could not generate a study plan right now.",
+    });
+  }
+});
 
 app.listen(port, () => {
   console.log(`CareerOS API running at http://localhost:${port}`);

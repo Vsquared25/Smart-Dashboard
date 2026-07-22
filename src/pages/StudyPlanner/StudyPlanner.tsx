@@ -1,47 +1,82 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { generateStudyPlan } from "../../services/api";
 
 export default function StudyPlanner() {
   const [course, setCourse] = useState("");
   const [goal, setGoal] = useState("");
   const [deadline, setDeadline] = useState("");
   const [availableHours, setAvailableHours] = useState("");
-  const [difficulty, setDifficulty] = useState("Medium");
+  const [difficulty, setDifficulty] =
+  useState<"Easy" | "Medium" | "Hard">("Medium");
+
+const [isGenerating, setIsGenerating] = useState(false);
+const [error, setError] = useState("");
+const [usingFallback, setUsingFallback] = useState(false);
   const [studyPlan, setStudyPlan] = useState<string[]>([]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(
+  event: FormEvent<HTMLFormElement>,
+) {
+  event.preventDefault();
 
-    const totalHours = Number(availableHours);
+  const totalHours = Number(availableHours);
 
-    if (
-      !course.trim() ||
-      !goal.trim() ||
-      !deadline ||
-      totalHours <= 0
-    ) {
-      return;
-    }
+  if (
+    !course.trim() ||
+    !goal.trim() ||
+    !deadline ||
+    totalHours <= 0
+  ) {
+    return;
+  }
 
-    const focusAreas = [
-      "Review core concepts",
-      "Practice problems",
-      "Analyze mistakes",
-      "Complete a final review",
-    ];
+  setIsGenerating(true);
+  setError("");
+  setUsingFallback(false);
 
-    const sessionCount = difficulty === "Hard" ? 4 : 3;
-    const hoursPerSession = totalHours / sessionCount;
+  try {
+    const plan = await generateStudyPlan({
+      course: course.trim(),
+      goal: goal.trim(),
+      deadline,
+      availableHours: totalHours,
+      difficulty,
+    });
 
-    const sessions = focusAreas
-      .slice(0, sessionCount)
-      .map(
-        (focus, index) =>
-          `Session ${index + 1}: ${focus} for ${hoursPerSession.toFixed(1)} hours`,
-      );
+    const sessions = plan
+      .split("\n")
+      .map((session) => session.trim())
+      .filter(Boolean);
 
     setStudyPlan(sessions);
+  } catch {
+  const focusAreas = [
+    "Review core concepts and class notes",
+    "Complete targeted practice problems",
+    "Analyze mistakes and weak areas",
+    "Do a final timed review",
+  ];
+
+  const sessionCount = difficulty === "Hard" ? 4 : 3;
+  const hoursPerSession = totalHours / sessionCount;
+
+  const fallbackSessions = focusAreas
+    .slice(0, sessionCount)
+    .map(
+      (focus, index) =>
+        `Session ${index + 1}: ${focus} for ${hoursPerSession.toFixed(1)} hours`,
+    );
+
+  setStudyPlan(fallbackSessions);
+  setUsingFallback(true);
+  setError(
+    "AI service is unavailable, so CareerOS created a local template plan.",
+  );
+  } finally {
+    setIsGenerating(false);
   }
+}
 
   return (
     <div>
@@ -149,7 +184,7 @@ export default function StudyPlanner() {
       <select
         id="difficulty"
         value={difficulty}
-        onChange={(event) => setDifficulty(event.target.value)}
+        onChange={(event) => setDifficulty(event.target.value as "Easy" | "Medium" | "Hard")}
         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
         <option value="Easy">Easy</option>
@@ -160,17 +195,28 @@ export default function StudyPlanner() {
   </div>
 
   <button
-    type="submit"
-    className="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700"
-  >
-    Generate Plan
-  </button>
+  type="submit"
+  disabled={isGenerating}
+  className="mt-6 rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+>
+  {isGenerating ? "Generating..." : "Generate Plan"}
+</button>
   </form>
+  {error && (
+  <p className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+    {error}
+  </p>
+)}
   {studyPlan.length > 0 && (
   <section className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-6">
     <h2 className="text-xl font-semibold text-gray-900">
       Your Study Plan
     </h2>
+    {usingFallback && (
+  <p className="mt-2 text-sm text-amber-700">
+    Using a local fallback plan while the AI service is unavailable.
+  </p>
+)}
 
     <p className="mt-1 text-sm text-gray-600">
       {course} - Goal: {goal} - Due: {deadline}

@@ -142,3 +142,31 @@ export async function deleteAssignment(
     throw new Error("Could not delete assignment.");
   }
 }
+
+export type StudyPlanRequest = {
+  course: string;
+  goal: string;
+  deadline: string;
+  availableHours: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+};
+
+export async function generateStudyPlan(
+  studyPlanRequest: StudyPlanRequest,
+): Promise<string> {
+  const response = await fetch(`${apiBaseUrl}/api/study-plans`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(studyPlanRequest),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not generate study plan.");
+  }
+
+  const data: { plan: string } = await response.json();
+
+  return data.plan;
+}
