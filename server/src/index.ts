@@ -198,7 +198,100 @@ app.delete("/api/courses/:id", async (request, response) => {
   return response.status(204).send();
 });
 
+app.get("/api/study-plans", async (_request, response) => {
+  const studyPlans = await prisma.studyPlan.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return response.status(200).json(studyPlans);
+});
+
 app.post("/api/study-plans", async (request, response) => {
+  const {
+    course,
+    goal,
+    deadline,
+    availableHours,
+    difficulty,
+    plan,
+    source,
+  } = request.body;
+
+  const validDifficulties = ["Easy", "Medium", "Hard"];
+  const validSources = ["ai", "fallback"];
+
+  if (
+    typeof course !== "string" ||
+    typeof goal !== "string" ||
+    typeof deadline !== "string" ||
+    typeof availableHours !== "number" ||
+    typeof difficulty !== "string" ||
+    typeof plan !== "string" ||
+    typeof source !== "string" ||
+    !course.trim() ||
+    !goal.trim() ||
+    !plan.trim() ||
+    availableHours <= 0 ||
+    !validDifficulties.includes(difficulty) ||
+    !validSources.includes(source)
+  ) {
+    return response.status(400).json({
+      message: "Valid saved study-plan details are required.",
+    });
+  }
+
+  const parsedDeadline = new Date(deadline);
+
+  if (Number.isNaN(parsedDeadline.getTime())) {
+    return response.status(400).json({
+      message: "Deadline must be valid.",
+    });
+  }
+
+  const savedStudyPlan = await prisma.studyPlan.create({
+    data: {
+      course: course.trim(),
+      goal: goal.trim(),
+      deadline: parsedDeadline,
+      availableHours,
+      difficulty,
+      plan: plan.trim(),
+      source,
+    },
+  });
+
+  return response.status(201).json(savedStudyPlan);
+});
+
+app.delete("/api/study-plans/:id", async (request, response) => {
+  const id = Number(request.params.id);
+
+  if (!Number.isInteger(id)) {
+    return response.status(400).json({
+      message: "Study plan ID must be a whole number.",
+    });
+  }
+
+  const existingStudyPlan = await prisma.studyPlan.findUnique({
+    where: { id },
+  });
+
+  if (!existingStudyPlan) {
+    return response.status(404).json({
+      message: "Study plan not found.",
+    });
+  }
+
+  await prisma.studyPlan.delete({
+    where: { id },
+  });
+
+  return response.status(204).send();
+});
+
+app.post("/api/study-plans/generate", async (request, response) => {
   const {
     course,
     goal,

@@ -154,7 +154,7 @@ export type StudyPlanRequest = {
 export async function generateStudyPlan(
   studyPlanRequest: StudyPlanRequest,
 ): Promise<string> {
-  const response = await fetch(`${apiBaseUrl}/api/study-plans`, {
+  const response = await fetch(`${apiBaseUrl}/api/study-plans/generate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -169,4 +169,66 @@ export async function generateStudyPlan(
   const data: { plan: string } = await response.json();
 
   return data.plan;
+}
+
+export type SavedStudyPlan = {
+  id: number;
+  course: string;
+  goal: string;
+  deadline: string;
+  availableHours: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+  plan: string;
+  source: "ai" | "fallback";
+  createdAt: string;
+};
+
+export type NewSavedStudyPlan = Omit<
+  SavedStudyPlan,
+  "id" | "createdAt"
+>;
+
+export async function getSavedStudyPlans(): Promise<
+  SavedStudyPlan[]
+> {
+  const response = await fetch(`${apiBaseUrl}/api/study-plans`);
+
+  if (!response.ok) {
+    throw new Error("Could not load saved study plans.");
+  }
+
+  return response.json();
+}
+
+export async function saveStudyPlan(
+  studyPlan: NewSavedStudyPlan,
+): Promise<SavedStudyPlan> {
+  const response = await fetch(`${apiBaseUrl}/api/study-plans`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(studyPlan),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not save study plan.");
+  }
+
+  return response.json();
+}
+
+export async function deleteSavedStudyPlan(
+  id: number,
+): Promise<void> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/study-plans/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not delete saved study plan.");
+  }
 }

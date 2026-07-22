@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { generateStudyPlan } from "../../services/api";
+import {
+  deleteSavedStudyPlan,
+  generateStudyPlan,
+  getSavedStudyPlans,
+  saveStudyPlan,
+  type SavedStudyPlan,
+} from "../../services/api";
 
 export default function StudyPlanner() {
   const [course, setCourse] = useState("");
@@ -14,6 +20,23 @@ const [isGenerating, setIsGenerating] = useState(false);
 const [error, setError] = useState("");
 const [usingFallback, setUsingFallback] = useState(false);
   const [studyPlan, setStudyPlan] = useState<string[]>([]);
+
+  const [savedPlans, setSavedPlans] = useState<
+  SavedStudyPlan[]
+>([]);
+
+useEffect(() => {
+  async function loadSavedPlans() {
+    try {
+      const savedPlansFromApi = await getSavedStudyPlans();
+      setSavedPlans(savedPlansFromApi);
+    } catch {
+      console.error("Could not load saved study plans.");
+    }
+  }
+
+  loadSavedPlans();
+}, []);
 
   async function handleSubmit(
   event: FormEvent<HTMLFormElement>,
@@ -50,6 +73,24 @@ const [usingFallback, setUsingFallback] = useState(false);
       .filter(Boolean);
 
     setStudyPlan(sessions);
+    try {
+  const savedPlan = await saveStudyPlan({
+    course: course.trim(),
+    goal: goal.trim(),
+    deadline,
+    availableHours: totalHours,
+    difficulty,
+    plan,
+    source: "ai",
+  });
+
+  setSavedPlans((currentPlans) => [
+    savedPlan,
+    ...currentPlans,
+  ]);
+} catch {
+  console.error("Could not save the AI study plan.");
+}
   } catch {
   const focusAreas = [
     "Review core concepts and class notes",
@@ -73,8 +114,38 @@ const [usingFallback, setUsingFallback] = useState(false);
   setError(
     "AI service is unavailable, so CareerOS created a local template plan.",
   );
+  try {
+  const savedPlan = await saveStudyPlan({
+    course: course.trim(),
+    goal: goal.trim(),
+    deadline,
+    availableHours: totalHours,
+    difficulty,
+    plan: fallbackSessions.join("\n"),
+    source: "fallback",
+  });
+
+  setSavedPlans((currentPlans) => [
+    savedPlan,
+    ...currentPlans,
+  ]);
+} catch {
+  console.error("Could not save the fallback study plan.");
+}
   } finally {
     setIsGenerating(false);
+  }
+}
+
+async function handleDeleteSavedPlan(id: number) {
+  try {
+    await deleteSavedStudyPlan(id);
+
+    setSavedPlans((currentPlans) =>
+      currentPlans.filter((savedPlan) => savedPlan.id !== id),
+    );
+  } catch {
+    console.error("Could not delete saved study plan.");
   }
 }
 
@@ -234,6 +305,53 @@ const [usingFallback, setUsingFallback] = useState(false);
     </ol>
   </section>
 )}
+<section className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-gray-900">
+    Saved Study Plans
+  </h2>
+
+  {savedPlans.length === 0 ? (
+    <p className="mt-3 text-sm text-gray-500">
+      No study plans have been saved yet.
+    </p>
+  ) : (
+    <div className="mt-5 space-y-3">
+      {savedPlans.map((savedPlan) => (
+        <article
+          key={savedPlan.id}
+          className="rounded-lg border border-gray-200 p-4"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">
+                {savedPlan.course}: {savedPlan.goal}
+              </h3>
+
+              <p className="mt-1 text-sm text-gray-600">
+                Due {savedPlan.deadline.slice(0, 10)} ·{" "}
+                {savedPlan.availableHours} hours
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+    {savedPlan.source === "ai" ? "AI" : "Local fallback"}
+  </span>
+
+  <button
+    type="button"
+    onClick={() => handleDeleteSavedPlan(savedPlan.id)}
+    className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+  >
+    Delete
+  </button>
+</div>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</section>
     </div>
 
     
