@@ -1,6 +1,6 @@
-# CareerOS
+# CampusPilot
 
-CareerOS is a full-stack student success platform for organizing coursework, managing internship applications, and creating personalized study plans.
+CampusPilot is a full-stack student success platform for organizing coursework, managing internship applications, and creating personalized study plans.
 
 It combines academic planning and career preparation in one dashboard, with persistent data powered by an Express API, Prisma ORM, and SQLite.
 

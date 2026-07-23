@@ -60,7 +60,7 @@ setPlannedStudyHours(totalPlannedStudyHours);
 
       setUpcomingAssignmentCount(activeAssignments.length);
     } catch {
-      setApiMessage("CareerOS API is unavailable.");
+      setApiMessage("CampusPilot API is unavailable.");
       setApiConnected(false);
     }
   }

@@ -13,7 +13,7 @@ const pageTitles: Record<string, string> = {
 
 export default function Navbar() {
   const location = useLocation();
-  const pageTitle = pageTitles[location.pathname] ?? "CareerOS";
+  const pageTitle = pageTitles[location.pathname] ?? "CampusPilot";
   return (
     <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
       {/* Left: current page title */}

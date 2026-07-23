@@ -27,7 +27,7 @@ export async function getHealth(): Promise<HealthResponse> {
   const response = await fetch(`${apiBaseUrl}/api/health`);
 
   if (!response.ok) {
-    throw new Error("Could not connect to the CareerOS API.");
+    throw new Error("Could not connect to the CampusPilot API.");
   }
 
   return response.json();

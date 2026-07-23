@@ -27,7 +27,7 @@ app.use(express.json());
 app.get("/api/health", (_request, response) => {
   response.status(200).json({
     status: "ok",
-    message: "CareerOS API is running",
+    message: "CampusPilot API is running",
   });
 });
 
@@ -440,5 +440,5 @@ Do not use markdown headings or introductory text.`,
 });
 
 app.listen(port, () => {
-  console.log(`CareerOS API running at http://localhost:${port}`);
+  console.log(`CampusPilot API running at http://localhost:${port}`);
 });

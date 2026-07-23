@@ -112,7 +112,7 @@ useEffect(() => {
   setStudyPlan(fallbackSessions);
   setUsingFallback(true);
   setError(
-    "AI service is unavailable, so CareerOS created a local template plan.",
+    "AI service is unavailable, so CampusPilot created a local template plan.",
   );
   try {
   const savedPlan = await saveStudyPlan({

@@ -31,7 +31,7 @@ export default function Sidebar() {
   return (
     <aside className="min-h-screen w-60 border-r border-gray-200 bg-white p-4">
       <h1 className="mb-8 text-2xl font-bold text-blue-600">
-        CareerOS
+        CampusPilot
       </h1>
 
       <nav className="flex flex-col gap-2">
