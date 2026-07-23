@@ -15,6 +15,8 @@ const {
   setTheme,
   textSize,
   setTextSize,
+  fontFamily,
+  setFontFamily,
 } = usePreferences();
 
 useEffect(() => {
@@ -175,6 +177,49 @@ useEffect(() => {
       </button>
     </div>
   </div>
+  <div className="mt-6">
+  <p className="text-sm font-medium text-gray-900">
+    Font family
+  </p>
+
+  <div className="mt-3 flex flex-wrap gap-3">
+    <button
+      type="button"
+      onClick={() => setFontFamily("sans")}
+      className={`rounded-lg px-4 py-2 text-sm font-medium ${
+        fontFamily === "sans"
+          ? "bg-blue-600 text-white"
+          : "border border-gray-300 bg-white text-gray-700"
+      }`}
+    >
+      Sans
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setFontFamily("serif")}
+      className={`rounded-lg px-4 py-2 text-sm font-medium ${
+        fontFamily === "serif"
+          ? "bg-blue-600 text-white"
+          : "border border-gray-300 bg-white text-gray-700"
+      }`}
+    >
+      Serif
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setFontFamily("mono")}
+      className={`rounded-lg px-4 py-2 text-sm font-medium ${
+        fontFamily === "mono"
+          ? "bg-blue-600 text-white"
+          : "border border-gray-300 bg-white text-gray-700"
+      }`}
+    >
+      Monospace
+    </button>
+  </div>
+</div>
 </section>
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900">

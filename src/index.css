@@ -104,3 +104,28 @@ html[data-theme="dark"] select {
   background-color: #111827;
   color: #f9fafb;
 }
+
+/* Persistent font-family preference. */
+html[data-font-family="sans"],
+html[data-font-family="sans"] button,
+html[data-font-family="sans"] input,
+html[data-font-family="sans"] select,
+html[data-font-family="sans"] textarea {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html[data-font-family="serif"],
+html[data-font-family="serif"] button,
+html[data-font-family="serif"] input,
+html[data-font-family="serif"] select,
+html[data-font-family="serif"] textarea {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+html[data-font-family="mono"],
+html[data-font-family="mono"] button,
+html[data-font-family="mono"] input,
+html[data-font-family="mono"] select,
+html[data-font-family="mono"] textarea {
+  font-family: Consolas, "Courier New", monospace;
+}

@@ -8,12 +8,15 @@ import {
 
 type Theme = "light" | "dark";
 type TextSize = "small" | "medium" | "large";
+type FontFamily = "sans" | "serif" | "mono";
 
 type PreferencesContextValue = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   textSize: TextSize;
   setTextSize: (textSize: TextSize) => void;
+  fontFamily: FontFamily;
+  setFontFamily: (fontFamily: FontFamily) => void;
 };
 
 const PreferencesContext =
@@ -45,6 +48,21 @@ export function PreferencesProvider({
     return "medium";
   });
 
+  const [fontFamily, setFontFamily] = useState<FontFamily>(() => {
+    const savedFontFamily = localStorage.getItem(
+      "campusPilotFontFamily",
+    );
+
+    if (
+      savedFontFamily === "serif" ||
+      savedFontFamily === "mono"
+    ) {
+      return savedFontFamily;
+    }
+
+    return "sans";
+  });
+
   useEffect(() => {
     localStorage.setItem("campusPilotTheme", theme);
     document.documentElement.dataset.theme = theme;
@@ -55,6 +73,11 @@ export function PreferencesProvider({
     document.documentElement.dataset.textSize = textSize;
   }, [textSize]);
 
+  useEffect(() => {
+    localStorage.setItem("campusPilotFontFamily", fontFamily);
+    document.documentElement.dataset.fontFamily = fontFamily;
+  }, [fontFamily]);
+
   return (
     <PreferencesContext.Provider
       value={{
@@ -62,6 +85,8 @@ export function PreferencesProvider({
         setTheme,
         textSize,
         setTextSize,
+        fontFamily,
+        setFontFamily,
       }}
     >
       {children}
