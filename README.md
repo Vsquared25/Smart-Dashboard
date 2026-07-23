@@ -42,9 +42,9 @@ It helps students manage courses, assignments, study plans, and internship appli
 
 ```text
 React + TypeScript frontend
-        ↓ REST API
+        -> REST API
 Express backend
-        ↓ Prisma ORM
+        -> Prisma ORM
 SQLite database
 ```
 
@@ -115,5 +115,10 @@ http://localhost:5173
 
 - CarmenCanvas/LMS synchronization through an institution-approved OAuth or LTI integration
 - Authentication and user-specific cloud data
-- Completed-study-sessio
-```
+- Completed-study-session tracking
+- Google Calendar synchronization
+- Persistent hosted deployment with a production database
+
+## Notes
+
+CampusPilot is a portfolio project. The temporary Cloudflare Quick Tunnel demo URL is intentionally not included here because it changes whenever the local tunnel restarts.
