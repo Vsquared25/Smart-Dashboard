@@ -1,13 +1,106 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #4F46E5;
-  --color-accent: #14B8A6;
-  --color-background: #F9FAFB;
-  --color-surface: #FFFFFF;
-  --color-text: #111827;
-  --color-text-muted: #6B7280;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
+  --color-primary: #ba0c2f;
+  --color-primary-dark: #8a001c;
+  --color-accent: #666666;
+  --color-background: #f7f7f7;
+  --color-surface: #ffffff;
+  --color-text: #1f2933;
+  --color-text-muted: #667085;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
+html {
+  background-color: #f7f7f7;
+}
+
+/* Text-size preference affects Tailwind's rem-based sizing. */
+html[data-text-size="small"] {
+  font-size: 14px;
+}
+
+html[data-text-size="medium"] {
+  font-size: 16px;
+}
+
+html[data-text-size="large"] {
+  font-size: 18px;
+}
+
+/* Scarlet-and-gray CampusPilot theme. */
+.bg-blue-600 {
+  background-color: #ba0c2f !important;
+}
+
+.text-blue-600 {
+  color: #ba0c2f !important;
+}
+
+.border-blue-200 {
+  border-color: #f1c4cf !important;
+}
+
+.accent-blue-600 {
+  accent-color: #ba0c2f;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: #8a001c !important;
+}
+
+.hover\:bg-blue-50:hover {
+  background-color: #fdf0f3 !important;
+}
+
+.focus\:border-blue-500:focus {
+  border-color: #ba0c2f !important;
+}
+
+.focus\:ring-blue-100:focus {
+  --tw-ring-color: #f1c4cf !important;
+}
+
+/* Dark mode overrides for the existing Tailwind-based interface. */
+html[data-theme="dark"] {
+  background-color: #111827;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .bg-background {
+  background-color: #111827 !important;
+}
+
+html[data-theme="dark"] .bg-white {
+  background-color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 {
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400 {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300 {
+  border-color: #475569 !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select {
+  background-color: #111827;
+  color: #f9fafb;
 }

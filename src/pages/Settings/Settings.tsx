@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePreferences } from "../../context/PreferencesContext";
 
 export default function Settings() {
   const [assignmentReminders, setAssignmentReminders] = useState(() => {
@@ -8,6 +9,13 @@ export default function Settings() {
 const [weeklyStudyReminder, setWeeklyStudyReminder] = useState(() => {
   return localStorage.getItem("weeklyStudyReminder") !== "false";
 });
+
+const {
+  theme,
+  setTheme,
+  textSize,
+  setTextSize,
+} = usePreferences();
 
 useEffect(() => {
   localStorage.setItem(
@@ -83,7 +91,91 @@ useEffect(() => {
   </label>
 </div>
         </section>
+        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-gray-900">
+    Appearance
+  </h2>
 
+  <p className="mt-2 text-sm text-gray-600">
+    Customize how CampusPilot looks on this device.
+  </p>
+
+  <div className="mt-6">
+    <p className="text-sm font-medium text-gray-900">
+      Theme
+    </p>
+
+    <div className="mt-3 flex gap-3">
+      <button
+        type="button"
+        onClick={() => setTheme("light")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+          theme === "light"
+            ? "bg-blue-600 text-white"
+            : "border border-gray-300 bg-white text-gray-700"
+        }`}
+      >
+        Light
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setTheme("dark")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+          theme === "dark"
+            ? "bg-blue-600 text-white"
+            : "border border-gray-300 bg-white text-gray-700"
+        }`}
+      >
+        Dark
+      </button>
+    </div>
+  </div>
+
+  <div className="mt-6">
+    <p className="text-sm font-medium text-gray-900">
+      Text size
+    </p>
+
+    <div className="mt-3 flex flex-wrap gap-3">
+      <button
+        type="button"
+        onClick={() => setTextSize("small")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+          textSize === "small"
+            ? "bg-blue-600 text-white"
+            : "border border-gray-300 bg-white text-gray-700"
+        }`}
+      >
+        Small
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setTextSize("medium")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+          textSize === "medium"
+            ? "bg-blue-600 text-white"
+            : "border border-gray-300 bg-white text-gray-700"
+        }`}
+      >
+        Medium
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setTextSize("large")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+          textSize === "large"
+            ? "bg-blue-600 text-white"
+            : "border border-gray-300 bg-white text-gray-700"
+        }`}
+      >
+        Large
+      </button>
+    </div>
+  </div>
+</section>
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900">
             Integrations
